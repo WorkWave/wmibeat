@@ -1,0 +1,71 @@
+hash: c13b04390e04a4166be33bef9b8176116bc734b5aed53859130714c97d13326c
+updated: 2017-10-17T12:22:13.266440961-04:00
+imports:
+- name: github.com/dustin/go-humanize
+  version: 8929fe90cee4b2cb9deb468b51fb34eba64d1bf0
+- name: github.com/eapache/go-resiliency
+  version: b86b1ec0dd4209a588dc1285cdd471e73525c0b3
+  subpackages:
+  - breaker
+- name: github.com/eapache/queue
+  version: ded5959c0d4e360646dc9e9908cff48666781367
+- name: github.com/elastic/beats
+  version: d8ca37efa8888ce624e2cfaa90107e79fd41be1e
+  subpackages:
+  - libbeat/beat
+  - libbeat/cfgfile
+  - libbeat/common
+  - libbeat/common/streambuf
+  - libbeat/logp
+  - libbeat/outputs
+  - libbeat/outputs/console
+  - libbeat/outputs/elasticsearch
+  - libbeat/outputs/fileout
+  - libbeat/outputs/kafka
+  - libbeat/outputs/logstash
+  - libbeat/outputs/mode
+  - libbeat/outputs/redis
+  - libbeat/publisher
+  - libbeat/service
+- name: github.com/eskibars/wmibeat
+  version: 668c3a7d83c990cf70622bb26f103a42ea696a96
+  subpackages:
+  - beater
+  - config
+- name: github.com/garyburd/redigo
+  version: 8873b2f1995f59d4bcdd2b0dc9858e2cb9bf0c13
+  subpackages:
+  - internal
+  - redis
+- name: github.com/go-ole/go-ole
+  version: 0e87ea779d9deb219633b828a023b32e1244dd57
+  subpackages:
+  - oleutil
+- name: github.com/golang/snappy
+  version: 894fd4616c897c201d223c3c0c128e8c648c96a2
+- name: github.com/klauspost/crc32
+  version: 6973dcf6594efa905c08260fe9120cae92ab4305
+- name: github.com/nranchev/go-libGeoIP
+  version: c78e8bd2dd3599feb21fd30886043979e82fe948
+- name: github.com/satori/go.uuid
+  version: 879c5887cd475cd7864858769793b2ceb0d44feb
+- name: github.com/Shopify/sarama
+  version: 4ba9bba6adb6697bcec3841e1ecdfecf5227c3b9
+- name: github.com/urso/ucfg
+  version: 60c5618c1d445e97c3c52d738dbc887d68af76a5
+  subpackages:
+  - yaml
+- name: golang.org/x/net
+  version: d58ca6618b994150e624f6888d871f4709db51a0
+  subpackages:
+  - proxy
+  - publicsuffix
+- name: golang.org/x/sys
+  version: 62bee037599929a6e9146f29d10dd5208c43507d
+  subpackages:
+  - windows
+  - windows/svc
+  - windows/svc/debug
+- name: gopkg.in/yaml.v2
+  version: a83829b6f1293c91addabc89d0571c246397bbf4
+testImports: []
