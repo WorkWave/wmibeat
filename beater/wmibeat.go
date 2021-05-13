@@ -1,66 +1,51 @@
 package beater
 
 import (
-	"fmt"
-	"time"
-	"strings"
 	"bytes"
+	"fmt"
+	"strings"
+	"time"
 
 	"github.com/elastic/beats/libbeat/beat"
-	"github.com/elastic/beats/libbeat/cfgfile"
 	"github.com/elastic/beats/libbeat/common"
 	"github.com/elastic/beats/libbeat/logp"
-	"github.com/elastic/beats/libbeat/publisher"
 
+	"github.com/eskibars/wmibeat/config"
 	"github.com/go-ole/go-ole"
 	"github.com/go-ole/go-ole/oleutil"
-	"github.com/eskibars/wmibeat/config"
 )
 
 type Wmibeat struct {
-	beatConfig           *config.Config
-	events               publisher.Client
-	compiledWmiQueries   map[string]string
-	done                 chan struct{}
-	period               time.Duration
+	config             config.Config
+	client             beat.Client
+	compiledWmiQueries map[string]string
+	done               chan struct{}
 }
 
 // Creates beater
-func New() *Wmibeat {
-	return &Wmibeat{
-		done: make(chan struct{}),
+func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
+	c := config.DefaultConfig
+	if err := cfg.Unpack(&c); err != nil {
+		return nil, fmt.Errorf("Error reading config file: %v", err)
 	}
+	bt := &Wmibeat{
+		done:   make(chan struct{}),
+		config: c,
+	}
+
+	return bt, nil
 }
 
-/// *** Beater interface methods ***///
-
-func (bt *Wmibeat) Config(b *beat.Beat) error {
-
-	// Load beater beatConfig
-	err := cfgfile.Read(&bt.beatConfig, "")
-	if err != nil {
-		return fmt.Errorf("Error reading config file: %v", err)
-	}
-
-	return nil
-}
-
-func (bt *Wmibeat) Setup(b *beat.Beat) error {
-	bt.events = b.Publisher.Connect()
-
-	// Setting default period if not set
-	if bt.beatConfig.Wmibeat.Period == "" {
-		bt.beatConfig.Wmibeat.Period = "1s"
-	}
-
+// Run starts wmibeat.
+func (bt *Wmibeat) Run(b *beat.Beat) error {
 	var err error
-	bt.period, err = time.ParseDuration(bt.beatConfig.Wmibeat.Period)
+	bt.client, err = b.Publisher.Connect()
 	if err != nil {
 		return err
 	}
 
 	bt.compiledWmiQueries = map[string]string{}
-	for _, class := range bt.beatConfig.Wmibeat.Classes {
+	for _, class := range bt.config.Classes {
 		if len(class.Fields) == 0 {
 			var errorString bytes.Buffer
 			errorString.WriteString("No fields defined for class ")
@@ -81,15 +66,9 @@ func (bt *Wmibeat) Setup(b *beat.Beat) error {
 		bt.compiledWmiQueries[class.Class] = query.String()
 	}
 
-	return nil
-}
-
-func (bt *Wmibeat) Run(b *beat.Beat) error {
-	var err error
-
 	logp.Info("wmibeat is running! Hit CTRL-C to stop it.")
-	
-	ticker := time.NewTicker(bt.period)	
+
+	ticker := time.NewTicker(bt.config.Period)
 	defer ticker.Stop()
 
 	for {
@@ -138,9 +117,9 @@ func (bt *Wmibeat) RunOnce(b *beat.Beat) error {
 
 	events := []common.MapStr{}
 
-	for _, class := range bt.beatConfig.Wmibeat.Classes {
+	for _, class := range bt.config.Classes {
 		query, exists := bt.compiledWmiQueries[class.Class]
-		if !exists { 
+		if !exists {
 			continue
 		}
 
@@ -163,7 +142,7 @@ func (bt *Wmibeat) RunOnce(b *beat.Beat) error {
 
 		count := int(countObj.Val)
 
-		for i :=0; i < count; i++ {
+		for i := 0; i < count; i++ {
 			rowObj, err := oleutil.CallMethod(result, "ItemIndex", i)
 			if err != nil {
 				logp.Err("Unable to get result item by index: %v", err)
@@ -174,9 +153,8 @@ func (bt *Wmibeat) RunOnce(b *beat.Beat) error {
 			row := rowObj.ToIDispatch()
 
 			event := common.MapStr{
-				"@timestamp": common.Time(time.Now()),
-				"type":       b.Name,
-				"class":    class.Class,
+				"class": class.Class,
+				"type":  "wmibeat",
 			}
 
 			for _, fieldName := range class.Fields {
@@ -195,7 +173,16 @@ func (bt *Wmibeat) RunOnce(b *beat.Beat) error {
 		}
 	}
 
-	bt.events.PublishEvents(events)
+	for _, wmievent := range events {
+		if wmievent != nil {
+			event := beat.Event{
+				Timestamp: time.Now(),
+				Fields:    wmievent,
+			}
+
+			bt.client.Publish(event)
+		}
+	}
 
 	return err
 }
@@ -206,5 +193,5 @@ func (bt *Wmibeat) Cleanup(b *beat.Beat) error {
 
 func (bt *Wmibeat) Stop() {
 	close(bt.done)
-	bt.events.Close()
+	bt.client.Close()
 }
