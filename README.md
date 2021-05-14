@@ -45,6 +45,22 @@ We can configure a set of classes, a set of fields per class, and a whereclause.
 WMIbeat will add the results as arrays.  If you need some help with what classes/fields, you can try [WMI Explorer](https://wmie.codeplex.com/).
 Note that many of the more interesting classes are "Perf" classes, which has a special checkbox to see in that tool.
 	  
+### Build your own Beat
+Dependencies
+Go 1.15.9 (https://golang.org/doc/install)
+Python >= 3.7
+
+```
+$ git clone github.com/WorkWave/wmibeat.git
+$ cd wmibeat
+$ go mod download # cache dependencies
+$ go mod vendor # create vendor folder for dependencies
+$ go build -mod=vendor # build beat
+```
+Beats is open source and has a convenient Beat generator, from which this project is based.
+For further development, check out the [beat developer guide](https://www.elastic.co/guide/en/beats/libbeat/current/new-beat.html).
+
+
 ### Run
 
 To run WMIbeat with debugging output enabled, run:
@@ -52,7 +68,3 @@ To run WMIbeat with debugging output enabled, run:
 ```
 ./wmibeat -c wmibeat.yml -e -d "*"
 ```
-
-## Build your own Beat
-Beats is open source and has a convenient Beat generator, from which this project is based.
-For further development, check out the [beat developer guide](https://www.elastic.co/guide/en/beats/libbeat/current/new-beat.html).
