@@ -3,11 +3,10 @@
 Welcome to WMIbeat.  WMIbeat is a [beat](https://github.com/elastic/beats) that allows you to run arbitrary WMI queries
 and index the results into [elasticsearch](https://github.com/elastic/elasticsearch) so you can monitor Windows machines.
 
-Ensure that this folder is at the following location:
-`${GOPATH}/github.com/eskibars`
+### Current beat version: 7.12.1
 
 ## Getting Started with WMIbeat
-Dependencies
+### Dependencies
 
 Go 1.15.9 (https://golang.org/doc/install)
 
