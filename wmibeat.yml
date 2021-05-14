@@ -4,9 +4,10 @@
 
 wmibeat:
   # Defines how often an event is sent to the output
-  period: 30s
+  period: 10s
 
   classes:
+
     - class: Win32_OperatingSystem
       fields:
       - FreePhysicalMemory
@@ -14,28 +15,58 @@ wmibeat:
       - FreeVirtualMemory
       - NumberOfProcesses
       - NumberOfUsers
+
+    - class: Win32_PerfFormattedData_PerfOS_System
+      fields:
+      - Processes
+      - ProcessorQueueLength
+      - SystemCallsPersec
+      - Threads
+
     - class: Win32_PerfFormattedData_PerfDisk_LogicalDisk
       fields:
       - Name
       - FreeMegabytes
       - PercentFreeSpace
       - CurrentDiskQueueLength
-      - DiskReadsPerSec
-      - DiskWritesPerSec
-      - DiskBytesPerSec
+      - DiskReadsPersec
+      - DiskWritesPersec
+      - DiskBytesPersec
       - PercentDiskReadTime
       - PercentDiskWriteTime
       - PercentDiskTime
       whereclause: Name != "_Total"
       objecttitlecolumn: Name
+      
+    - class: Win32_PerfFormattedData_PerfDisk_PhysicalDisk
+      fields:
+      - Name
+      - AvgDiskQueueLength
+      - CurrentDiskQueueLength
+      - DiskReadsPersec
+      - DiskReadBytesPersec
+      - DiskWritesPersec
+      - DiskWriteBytesPersec
+
     - class: Win32_PerfFormattedData_PerfOS_Memory
       fields:
-      - CommittedBytes
       - AvailableBytes
+      - CommittedBytes
+      - PagesPersec
       - PercentCommittedBytesInUse
+
+    - class: Win32_PerfFormattedData_Counters_ProcessorInformation
+      fields:
+      - Name
+      - PercentProcessorTime
+
+
 ###############################################################################
 ############################# Libbeat Config ##################################
 # Base config file used by all other beats for using libbeat features
+
+setup.ilm.enabled: false
+setup.ilm.check_exists: false
 
 ############################# Output ##########################################
 
@@ -49,12 +80,12 @@ output:
     # Scheme and port can be left out and will be set to the default (http and 9200)
     # In case you specify and additional path, the scheme is required: http://localhost:9200/path
     # IPv6 addresses should always be defined as: https://[2001:db8::1]:9200
-    hosts: ["localhost:9200"]
+    hosts: ["localhost:443"]
 
     # Optional protocol and basic auth credentials.
-    #protocol: "https"
-    #username: "admin"
-    #password: "s3cr3t"
+    protocol: "https"
+    username: "username"
+    password: "password"
 
     # Dictionary of HTTP parameters to pass within the url with index operations.
     #parameters:
@@ -281,7 +312,7 @@ logging:
 
   # Write all logging output to files. Beats automatically rotate files if rotateeverybytes
   # limit is reached.
-  #to_files: false
+  to_files: true
 
   # To enable logging to files, to_files option has to be set to true
   files:

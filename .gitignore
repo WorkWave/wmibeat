@@ -6,3 +6,4 @@
 /wmibeat
 /wmibeat.test
 *.pyc
+go.sum
